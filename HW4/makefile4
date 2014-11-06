@@ -1,0 +1,13 @@
+CC= icc
+OBJS= HW4.cpp
+INPUT= 50 4 ./data3.txt 20 
+
+all: Runit 
+
+eigs: $(OBJS)
+	$(CC) -openmp -std=c++11 -g -o eigs $(OBJS)
+
+Runit: eigs
+	./eigs $(INPUT)
+
+

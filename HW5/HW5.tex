@@ -1,0 +1,75 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath} 
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{enumitem}
+\usepackage{enumerate}
+
+\title{Machine Learning HW5}
+\author{Aaron Myers}
+
+\begin{document}
+
+\maketitle
+\section{Galois Instllation}
+\begin{enumerate}[a)]
+  \item 
+    \begin{verbatim}
+    $ tar xvzf Galois-2.2.1.tar.gz;
+    $ cd Galois-2.2.1/build;
+    $ mkdir default; cd default;
+    $ module load boost/1.55.0
+    $ module load cmake
+    $ module swap intel gcc/4.7.1 
+    $ export BOOST_ROOT=$TACC_BOOST_DIR
+    $ cmake ../..
+    $ make
+    \end{verbatim}
+  \item Completed
+\end{enumerate}
+
+\section{Sparse Matrix-Vector Multiplication}
+\begin{enumerate}[a)]
+  \item Completed
+  \item Run Times listed below
+\begin{center}
+	\begin{tabular}{c|c}
+	\hline\hline
+	Thread & Run Time(s) \\
+	\hline \hline
+	1 & 0.773 \\
+	4 & 0.390 \\
+	8 & 0.293 \\
+	16 & 0.187
+	\end{tabular}
+\end{center}
+\end{enumerate}
+
+\pagebreak
+\section{PageRank}
+\begin{enumerate}[a)]
+  \item To compute $P^{T}$r, first we need to compute $AD^{-1}$r which will obviously only require O(nnz(A)); since D is diagonal, it will only scale the values in A, creating no new values. Second we compute v$\sum_{i=1}^{n} r_{i}$, which is O(n) and fill in the values of $P^{T}$r where there are zeros in A according to column and add v$\sum_{i=1}^{n} r_{i}$ to non-zero entries of A which is an O(nnz(A)) computation. Therefore the result is O(nnz(A) + n). Below is a derivation for the explanatiion above:
+    \begin{align}
+      P^{T}r &= ((1-\alpha)D^{-1}A + \alpha1v^{T})^{T}r \\
+      &=  (1-\alpha)A^{T}D^{-T}r + \alpha v 1^{T}r \\
+      &= (1-\alpha)AD^{-1}r + \alpha v \sum_{i=1}^{n} r_{i}
+      \label{}
+    \end{align}
+  \item Run time: 12.3s, Matlab 45s.
+  \item Top 10 Nodes:
+\begin{verbatim}
+Search for nodes...
+Rank: 1, 0.000196396, 4728
+Rank: 2, 0.000192605, 2265
+Rank: 3, 0.000177875, 238
+Rank: 4, 0.000177258, 7587
+Rank: 5, 0.000173138, 1506
+Rank: 6, 0.000168211, 3655
+Rank: 7, 0.000124487, 8556
+Rank: 8, 0.000110405, 44092
+Rank: 9, 0.000107078, 7100
+Rank: 10, 0.000106554, 7556
+\end{verbatim}
+\end{enumerate}
+\end{document}

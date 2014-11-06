@@ -1,0 +1,80 @@
+DIR=$1
+
+hadoop fs -rm -r out11
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar \
+-D stream.num.map.output.key.fields=2 -input $DIR/*1.txt -output ./out11 \
+-file ./mapper.py -mapper ./mapper.py -file ./reducer.py -reducer ./reducer.py
+
+hadoop fs -rm -r out12
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar \
+-D stream.num.map.output.key.fields=2 -input $DIR/*2.txt -output ./out12 \
+-file ./mapper.py -mapper ./mapper.py -file ./reducer.py -reducer ./reducer.py
+
+hadoop fs -rm -r out13
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar \
+-D stream.num.map.output.key.fields=2 -input $DIR/*3.txt -output ./out13 \
+-file ./mapper.py -mapper ./mapper.py -file ./reducer.py -reducer ./reducer.py
+
+hadoop fs -rm -r out14
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar \
+-D stream.num.map.output.key.fields=2 -input $DIR/*4.txt -output ./out14 \
+-file ./mapper.py -mapper ./mapper.py -file ./reducer.py -reducer ./reducer.py
+
+hadoop fs -rm -r out15
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar \
+-D stream.num.map.output.key.fields=2 -input $DIR/*5.txt -output ./out15 \
+-file ./mapper.py -mapper ./mapper.py -file ./reducer.py -reducer ./reducer.py
+
+
+hadoop fs -rm -r out16
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar \
+-D stream.num.map.output.key.fields=2 -input $DIR/*6.txt -output ./out16 \
+-file ./mapper.py -mapper ./mapper.py -file ./reducer.py -reducer ./reducer.py
+
+hadoop fs -rm -r out17
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar \
+-D stream.num.map.output.key.fields=2 -input $DIR/*7.txt -output ./out17 \
+-file ./mapper.py -mapper ./mapper.py -file ./reducer.py -reducer ./reducer.py
+
+hadoop fs -rm -r out18
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar \
+-D stream.num.map.output.key.fields=2 -input $DIR/*8.txt -output ./out18 \
+-file ./mapper.py -mapper ./mapper.py -file ./reducer.py -reducer ./reducer.py
+
+hadoop fs -rm -r out19
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar \
+-D stream.num.map.output.key.fields=2 -input $DIR/*9.txt -output ./out19 \
+-file ./mapper.py -mapper ./mapper.py -file ./reducer.py -reducer ./reducer.py
+
+hadoop fs -rm -r out10
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar \
+-D stream.num.map.output.key.fields=2 -input $DIR/*0.txt -output ./out10 \
+-file ./mapper.py -mapper ./mapper.py -file ./reducer.py -reducer ./reducer.py
+
+
+
+#Sending all subesets of the data to the next mapred
+
+hadoop fs -rm -r out2
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar \
+-D stream.num.map.output.key.fields=1 -input ./out1* -output ./out2 \
+-mapper org.apache.hadoop.mapred.lib.IdentityMapper \
+-inputformat org.apache.hadoop.mapred.KeyValueTextInputFormat \
+-file ./reducer2.py -reducer ./reducer2.py
+
+hadoop fs -rm -r out3
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar \
+-D stream.num.map.output.key.fields=2 -D poop=`hadoop fs -ls $DIR/* | tail -n +2 | wc -l` -input ./out2 -output ./out3 \
+-mapper org.apache.hadoop.mapred.lib.IdentityMapper \
+-inputformat org.apache.hadoop.mapred.KeyValueTextInputFormat \
+-file ./reducer3.py -reducer ./reducer3.py
+
+hadoop fs -cat out3/part-00000 | ./makedict.py
+
+hadoop fs -rm -r out4
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar \
+-D stream.num.map.output.key.fields=2 \
+-Dmapred.text.key.comparator.options='-k1,1 -k2n' \
+-Dmapred.output.key.comparator.class=org.apache.hadoop.mapred.lib.KeyFieldBasedComparator \
+-input ./out3 -output ./out4 \
+-file ./mapper5.py -mapper ./mapper5.py -file ./reducer4.py -reducer ./reducer4.py

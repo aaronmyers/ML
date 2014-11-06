@@ -1,0 +1,13 @@
+CC= icc
+OBJS= HW4.cpp
+INPUT= .1 8 ./data/covtype.tr ./data/covtype.t 
+
+all: Runit 
+
+cd_svm: $(OBJS)
+	$(CC) -openmp -std=c++11 -g -o cd_svm $(OBJS)
+
+Runit: cd_svm
+	./cd_svm $(INPUT)
+
+
