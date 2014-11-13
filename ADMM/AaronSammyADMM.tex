@@ -1,0 +1,419 @@
+
+\documentclass{beamer}
+\mode<presentation> {
+
+%\usetheme{default}
+%\usetheme{AnnArbor}
+%\usetheme{Antibes}
+%\usetheme{Bergen}
+%\usetheme{Berkeley}
+%\usetheme{Berlin}
+%\usetheme{Boadilla}
+%\usetheme{CambridgeUS}
+%\usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+%\usetheme{Dresden}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+%\usetheme{Hannover}
+%\usetheme{Ilmenau}
+%\usetheme{JuanLesPins}
+%\usetheme{Luebeck}
+\usetheme{Madrid}
+%\usetheme{Malmoe}
+%\usetheme{Marburg}
+%\usetheme{Montpellier}
+%\usetheme{PaloAlto}
+%\usetheme{Pittsburgh}
+%\usetheme{Rochester}
+%\usetheme{Singapore}
+%\usetheme{Szeged}
+%\usetheme{Warsaw}
+
+% As well as themes, the Beamer class has a number of color themes
+% for any slide theme. Uncomment each of these in turn to see how it
+% changes the colors of your current slide theme.
+
+%\usecolortheme{albatross}
+%\usecolortheme{beaver}
+%\usecolortheme{beetle}
+%\usecolortheme{crane}
+%\usecolortheme{dolphin}
+%\usecolortheme{dove}
+%\usecolortheme{fly}
+%\usecolortheme{lily}
+%\usecolortheme{orchid}
+%\usecolortheme{rose}
+%\usecolortheme{seagull}
+%\usecolortheme{seahorse}
+%\usecolortheme{whale}
+%\usecolortheme{wolverine}
+% wlh
+%\setbeamertemplate{footline} % To remove the footer line in all slides uncomment this line
+%\setbeamertemplate{footline}[page number] % To replace the footer line in all slides with a simple slide count uncomment this line
+
+%\setbeamertemplate{navigation symbols}{} % To remove the navigation symbols from the bottom of all slides uncomment this line
+}
+
+\usepackage{graphicx} % Allows including images
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\title[ADMM]{ADMM} % The short title appears at the bottom of every slide, the full title is only on the title page
+
+\author{Aaron Myers, Sameer Tharakan} % Your name
+\institute[UT Austin - ICES] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
+{
+University of Texas at Austin \\ % Your institution for the title page
+\medskip
+%\textit{aaron.myers@utexas.edu, sameer@ices.utexas.edu} % Your email address
+}
+\date{\today} % Date, can be changed to a custom date
+
+\begin{document}
+
+\begin{frame}
+\titlepage % Print the title page as the first slide
+\end{frame}
+
+\begin{frame}
+\frametitle{Overview} % Table of contents slide, comment this block out to remove it
+\tableofcontents % Throughout your presentation, if you choose to use \section{} and \subsection{} commands, these will automatically be printed on this slide as an overview of your presentation
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+%	PRESENTATION SLIDES
+%----------------------------------------------------------------------------------------
+
+%------------------------------------------------
+\section{ADMM Overview} % Sections can be created in order to organize your presentation into discrete blocks, all sections and subsections are automatically printed in the table of contents as an overview of the talk
+%------------------------------------------------
+
+\subsection{Mulipliers and the dual problem} % A subsection can be created just before a set of slides with a common theme to further break down your presentation into chunks
+
+\begin{frame}
+\frametitle{Purpose}
+We can think about ADMM as a method for solving problems in which the objective function and constraints are distributed across multiple threads 
+\linebreak
+\newline
+ADMM can also be applied to any convex problem, where gradient descent or conjugate gradient descent requires differntiable and unconstrained conditions.
+\linebreak
+\newline
+ADMM Combines two concepts:
+\begin{enumerate}
+  \item Method of Multipliers
+  \item Dual Ascent
+\end{enumerate}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Multipliers and Descent}
+  Typical Lagrange multiplier problem where f(x) is the objective function, y is the multiplier, h(x)=0 is the constraint:
+  \begin{align}
+    L(x,y,b) = f(x) + y^{T}h(x)
+    \label{}
+  \end{align}
+  Descent Problem, with $\gamma$ as the step size
+  \begin{align}
+    x_{n+1} = x_{n} - \gamma_{n}\nabla f(x_{n})
+  \end{align}
+Method of Multipliers
+\begin{align}
+  x^{k+1} &= \: \: \: argmin_{x} L_{\rho}(x,y^{k}) \\
+  y^{k+1} &= y^{k} + \rho h(x)
+\end{align}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{What's the Reasoning behind the updates?}
+  Two variable example
+  \begin{align}
+   &Ax^{*} - b = 0 \: \: \: \: \: \nabla f(x^{*}) + A^{T}y^{*} = 0 \\
+   0 &= \nabla_{x} L_{\rho} (x^{k+1},y^{k}) \\
+   &= \nabla_{x} f(x^{k+1}) + A^{T}(y^{k} + \rho (Ax^{k+1} - b)) \\
+   &= \nabla_{x} f(x^{k+1}) + A^{T} y^{k+1}
+  \end{align}
+  Similar motivation for two variables z, y
+\end{frame}
+
+\begin{frame}
+  \frametitle{Example ADMM Framing}
+  Original minimization problem
+  \begin{align}
+    min \: \: \: f(x) &= \|Ax-b\|_{2}^{2} \\
+    x & \geq 0
+  \end{align}
+  ADDM form:
+  \begin{align}
+   min \: \: \: &\|Ax-b\|_{2}^{2} + I_{+}(z) \\
+    & x-z = 0
+  \end{align}
+  ADMM Augmented Lagrangian:
+  \begin{align}
+    L_{\rho}(x,z,y) =f(x) +  g(z) + y^{T}(x-z) + \frac{\rho}{2}\|x-z\|_{2}^{2} 
+  \end{align}
+\end{frame}
+
+\begin{frame}
+\frametitle{ADMM General Problem and Algorithm}
+General ADMM form
+\begin{align}
+  min \: \: \: &f(x) + g(z) \\
+  & Ax + Bz = c
+\end{align}
+\begin{theorem}[ADMM Algorithm]
+  $x^{k+1} = argmin_{x} \left( L_{\rho} (x,z^{k}, y^{k} ) \right)$ \\
+  $z^{k+1} = argmin_{z} \left( L_{\rho}(x^{k+1},z,y^{k} )\right)$ \\
+  $y^{k+1} = y^{k} + \rho(Ax^{k+1} + Bz^{k+1} - c)  $
+\end{theorem}
+We can set u= $\frac{1}{\rho}$y and simplify the algorithm
+\end{frame}
+
+
+\section{Consensus and Sharing}
+%lkj
+\subsection{Consensus Problem}
+\begin{frame}
+  \frametitle{Consensus Problem}
+  Global Consensus Problem
+  \begin{align}
+    min \: \: \: f(x)=\sum_{i=1}^{N} f_{i}(x_{i}) \\
+    x_{i} - z = 0 \: \: \: \forall i
+  \end{align}
+
+  We separate x into $x_{i}$'s (local variables) and add the constraint associated with the global variable z.
+  \linebreak
+  \newline
+  This problem shows up in networks and signal processing.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Consensus General Form with regularization} 
+  \begin{align}
+    min \: \: \: &\sum_{i=1}^{N} f_{i}(x_{i}) + g(z) \\
+    &x_{i} - z = 0 \: \: \: \forall i
+  \end{align}
+  Resulting ADMM algorithm
+  \begin{align}
+    x_{i}^{k+1} &= argmin_{x} \left(f_{i}(x_{i}) + y_{i}^{kT}(x_{i} - z^{k}) + \frac{\rho}{2} \|x_{i} - z^{k} \|_{2}^{2}    \right) \\
+    z^{k+1} &= argmin_{z} \left( g(z) + \sum_{i=1}^{N} \left( -y_{i}^{kT}z + \frac{\rho}{2} \|x_{i}^{k+1}-z\|_{2}^{2}  \right)  \right) \\
+    y_{i}^{k+1} &= y_{i}^{k} + \rho (x_{i}^{k+1} - z^{k+1})
+  \end{align}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Sharing Problem}
+  General Sharing problem (this has a dual realtionship with the consensus problem)
+  \begin{align}
+    min \: \: \: \sum_{i=1}^{N} f_{i}(x_{i}) + g(\sum_{i=1}^{N} x_{i})
+  \end{align}
+  Sharing problem in ADMM form:
+  \begin{align}
+    min \: \: \: &\sum_{i=1}^{N} f_{i}(x_{i}) + g(\sum_{i=1}^{N} z_{i}) \\
+    & x_{i} - z_{i} = 0 \: \: \: \forall i
+  \end{align}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Resulting algorithm - Scaled Form}
+  \begin{align}
+    x_{i}^{k+1} &= argmin_{x} \left(f_{i}(x_{i}) +  \frac{\rho}{2} \|x_{i} - z_{i}^{k} + u_{i}^{k} \|_{2}^{2}    \right) \\
+    z^{k+1} &= argmin_{z} \left( g(\sum_{i=1}^{N} z_{i}) + (\rho/2) \sum_{i=1}^{N} \left(\|z_{i}-x_{i}^{k+1} - u_{i}^{k}\|_{2}^{2}  \right)  \right) \\
+    u_{i}^{k+1} &= u_{i}^{k} +  x_{i}^{k+1} - z^{k+1}
+  \end{align}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Exchange Problem}
+  Exchange Problem:
+  \begin{align}
+    min \: \: \: &\sum_{i=1}^{N} f_{i}(x_{i}) \\
+    & \sum_{i=1}^{N} x_{i} = 0
+  \end{align}
+  Here g would be the indicator function on the set \{0\}
+  \linebreak
+  \newline
+  The Exchange ADMM problem can be veiwed as a form of the tatonnement or prices adjustment process
+\end{frame}
+
+\begin{frame}
+  \frametitle{Algorithm for Exchange problem}
+  \begin{align}
+    x_{i}^{k+1} &= argmin_{x} \left( f_{i}(x_{i}) + y^{kT}x_{i} + \frac{\rho}{2} \|x_{i} - ( x_{i}^{k} - \bar{x}^{k} )\|_{2}^{2}   \right)  \\
+    y^{k+1} &= y^{k} + \rho \bar{x}^{k+1} 
+  \end{align}
+  Here we can interperet y to be the price vector when applied to competitive market problems in economics. Note: we use the average $\bar{x}$ rather than $x^{k+1}$.
+\end{frame}
+
+\section{Distributed Model Fitting}
+
+\begin{frame}
+  \frametitle{General Form for model fit}
+  General Model fit problem where l is the loss function
+  \begin{align}
+    min \: \: \: \:& l(Ax-b) + r(x) \\
+    l(Ax-b) &= \sum_{i=1}^{m} l_{i} (a_{i}^{T}x - b_{i})
+  \end{align}
+  Here r is the regularization term and could be (among others): \\
+  %\linebreak
+  
+  %\newline
+  \begin{center}
+  ridge penalty $\lambda \|x\|_{2}^{2}$ \\
+  lasso penalty $\lambda \|x\|_{1}$
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Model Fit examples}
+  \begin{enumerate}[1)]
+    \item Regeression
+      \begin{align}
+	b_{i} = a_{i}^{T}x + v_{i}
+      \end{align}
+      Where $v_{i}$ are the error terms
+    \item Classification
+      \begin{align}
+	sign(p_{i}^{T}w + v) = q_{i}
+      \end{align}
+      The equation above is referred to as the discriminant function
+  \end{enumerate}
+\end{frame}
+
+\subsection{Splitting Across Examples}
+
+\begin{frame}
+  \frametitle{Splitting Across Examples}
+  Splitting across examples is a way to handle model fit problems with a modest number of features but a very large number of training examples
+  \begin{center}
+    A=$[ A_{1} \ldots A_{N} ]^{T}$ \\
+    b=$[b_{1} \ldots b_{N} ]^{T}$
+  \end{center}
+  \begin{align}
+    &min \: \: \: \: l_{i} (A_{i}x-b_{i}) + r(z) \\
+    & x_{i} - z = 0 \: \: \: \forall i
+    \label{}
+  \end{align}
+  Applies to Lasso, Log Regression, SVM
+\end{frame}
+
+\begin{frame}
+  \frametitle{Scaled ADMM algorithm for example splitting}
+  The below scaled version of ADMM is much easier to work with than the unscaled version
+  \begin{align}
+    x_{i}^{k+1} &= argmin_{x} \left( l_{i}(A_{i}x_{i} - b_{i}) + (\rho/2) \| x_{i} - x^{k} + u_{i}^{k} \|_{2}^{2}  \right) \\
+    z^{k+1} &= argmin_{x} \left( r(z) + (N\rho/2)\| z - \bar{x}^{k+1} - \bar{u}^{k}  \|_{2}^{2}  \right)\\
+    u_{i}^{k+1} &= u_{i}^{k} + x_{i}^{k+1} - z^{k_1}
+  \end{align}
+Now we will show an example with: N=400, d=2, split into 20 groups in the worst way (each group contatins only elements from one class)
+\end{frame}
+
+\begin{frame}
+  \frametitle{Consensus Example}
+
+  \begin{figure}[]
+    \centering
+    \includegraphics[width=0.8\linewidth]{./snapshot0.jpeg}
+  \end{figure}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Consensus Example}
+  \begin{figure}[]
+    \centering
+    \includegraphics[width=0.8\linewidth]{./snapshot3.jpeg}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Consensus Example}
+  \begin{figure}[]
+    \centering
+    \includegraphics[width=0.8\linewidth]{./snapshot2.jpeg}
+  \end{figure}
+\end{frame}
+\subsection{Splitting Across Features}
+
+\begin{frame}
+  \frametitle{Spltting Across Features}
+  This is for model problems with a modest number of examples but a large number of features \\
+  \begin{center}
+	x=[$x_{1} \cdots x_{N}$]
+  \end{center}
+	\begin{align}
+	  min \: \: \: \: l(\sum_{i=1}^{N} A_{i}x_{i} - b) + \sum_{i=1}^{N} r_{i}(x_{i})
+	  \label{}
+	\end{align}
+	This method can be applied to lasso, group lasso, sparse log regression, SVM
+\end{frame}
+
+\begin{frame}
+  \frametitle{Sharing problem seen as splitting across features}
+  The sharing problem from eariler can be expressed as a feature splitting problem
+  \begin{align}
+    min \: \: \: &l\left( \sum_{i=1}^{N} z_{i} - b  \right) + \sum_{i=1}^{N} r_{i}(x_{i}) \\
+    & A_{i}x_{i} - z_{i} = 0 \: \: \: \forall i
+  \end{align}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{ADMM Results}
+  Below are comparison results for ADMM applied to elastic net regularization:
+  \begin{align}
+    min_{u} \: \: \: \lambda_{1} |u| + \frac{\lambda_{2}}{2} \|u\|^{2} + \frac{1}{2}\|Mu-f\|^{2}
+  \end{align}
+  \begin{figure}[]
+    \centering
+    \includegraphics[width=0.8\linewidth]{./snapshot1.jpeg}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{ADMM Results}
+
+  \begin{figure}[]
+    Performance Comparison with other methods
+    \centering
+    \includegraphics[width=0.8\linewidth]{./speedtests.jpeg}
+  \end{figure}
+\end{frame}
+%------- Everything below this line is for formatting purposes
+%------------------------------------------------
+%----------------------------------
+%----------------------------------
+%---------------------------------
+
+
+
+%------------------------------------------------
+
+
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{References}
+\begin{thebibliography}{99}
+\bibitem[Boyd, Parikh, CHu, Peleato, Eckstein]{p2} Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers Boyd, et al. (2010)
+\bibitem[Goldstein, O'Donoghue, Setzer, Baraniuk]{p3} Fast Alternating Direction Optimization Methods Goldsteing et al. 
+\bibitem[Chun, S.T.; Dewaraja, Y.K.; Fessler, J.A]{p4} Alternating Direction Method of Multipliers for Tomography with Nonlocal Regularizers S.T. Chun, et al (2014)
+\end{thebibliography}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\Huge{\centerline{Questions}}
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+
+\end{document} 
