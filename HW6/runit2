@@ -1,0 +1,30 @@
+DIR=$1
+
+hadoop fs -rm -r outc1
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar \
+-D stream.num.map.output.key.fields=2 -input $DIR -output ./outc1 \
+-file ./mapper.py -mapper ./mapper.py -file ./reducer.py -reducer ./reducer.py
+
+hadoop fs -rm -r outc2
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar \
+-D stream.num.map.output.key.fields=1 -input ./outc1 -output ./outc2 \
+-mapper org.apache.hadoop.mapred.lib.IdentityMapper \
+-inputformat org.apache.hadoop.mapred.KeyValueTextInputFormat \
+-file ./reducer2.py -reducer ./reducer2.py
+
+hadoop fs -rm -r outc3
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar \
+-D stream.num.map.output.key.fields=2 -D poop=`hadoop fs -ls $DIR | tail -n +2 | wc -l` -input ./outc2 -output ./outc3 \
+-mapper org.apache.hadoop.mapred.lib.IdentityMapper \
+-inputformat org.apache.hadoop.mapred.KeyValueTextInputFormat \
+-file ./reducer3.py -reducer ./reducer3.py
+
+hadoop fs -cat outc3/part-00000 | ./makedictbigger.py
+
+hadoop fs -rm -r outc4
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar \
+-D stream.num.map.output.key.fields=2 \
+-D mapred.text.key.comparator.options='-k1,1 -k2,2n' \
+-D mapred.output.key.comparator.class=org.apache.hadoop.mapred.lib.KeyFieldBasedComparator \
+-input ./outc3 -output ./outc4 \
+-file ./mapper5big.py -mapper ./mapper5big.py -file ./reducerb4.py -reducer ./reducerb4.py
